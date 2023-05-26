@@ -181,13 +181,13 @@ def menu():
     match(eleccion):
         case 1:
             system("cls")
-            precio_dolar_historico(ocsv.read_csv('./dolarPrecio.csv',';'))
+            precio_dolar_historico(ocsv.read_csv('.datasets/dolarPrecio.csv',';'))
         case 2:
             system("cls")
-            inflacion_mundial(ocsv.read_csv('./inflacionMundial.csv',','))
+            inflacion_mundial(ocsv.read_csv('./datasets/inflacionMundial.csv',','))
         case 3:
             system("cls")
-            precio_internacional_productos(ocsv.read_csv('./indicePrecioProducto.csv',','))
+            precio_internacional_productos(ocsv.read_csv('./datasets/indicePrecioProducto.csv',','))
             
         case 4:
             system("cls")
