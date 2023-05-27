@@ -2,9 +2,11 @@
 Datos Economicos - Inflación, Dolar y Precios Internacionales
 
 Para correr este programa debes ejecutar
-'''
+
+```
 python3 main.py 
-'''
+```
+
 (desde carpeta py-project)
 
 Este proyecto fue creado a partir del Curso de Python de Platzi.
