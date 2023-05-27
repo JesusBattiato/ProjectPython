@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import open_csv as ocsv
-from os import system
+import os
+import shutil
 
 def precio_dolar_historico(data):
-    system("cls")
+    clear()
     year = 1913
     while year not in range(1914,2024):
         try:
@@ -40,22 +41,26 @@ def precio_dolar_historico(data):
    
     plt.ylim(-1,600) 
     plt.xticks(range(year, 2023, 10))
-    plt.title('Valor de Dolar Oficial desde ' + str(year))
+    plt_name = 'Valor de Dolar Oficial desde ' + str(year)
+    plt.title(plt_name)
+    plt.savefig(plt_name +'.jpg')
+    shutil.move(plt_name +'.jpg', './graphs/'+plt_name+'.jpg')
     plt.show()
 
     finalizar_programa()
 
 
 def inflacion_mundial(data):
-    system("cls")
+    clear()
     countries = [item['Country Name'] for item in data]
-    print(len(countries))
     country = 9
     while country not in countries:
-        print('Elige un Pais, o escribe su nombre')
+        
         for i in range(0, len(countries)-1):
             print(str(i+1) + ' - ' + countries[i] )
-
+        
+        print()
+        print('Elige un Pais, o escribe su nombre')
         eleccion = input('Tipea el nombre de un pais (debe ser exactamente igual que en listado), o el numero que lo representa ==> ')
         if len(eleccion) in range(1,4):
             if int(eleccion) in range(0, len(countries)):
@@ -84,26 +89,31 @@ def inflacion_mundial(data):
     ax.plot(labels, values) 
     plt.ylim(-1,150)
     plt.xticks(range(1960, 2023, 10))
-    plt.title('Inflación Historica de '+ country)
+    plt_name = 'Inflación Historica de '+ country
+    plt.title(plt_name)
+    plt.savefig(plt_name +'.jpg')
+    shutil.move(plt_name +'.jpg', './graphs/'+plt_name+'.jpg')
     plt.show()
-    system("cls")
+    clear()
     finalizar_programa()
 
 
 def precio_internacional_productos(data):
-    system("cls")
+    clear()
     products = [key for key in data[0]]
     products.pop(0)
     products
     
-    print('\n \n' + '***'*3 + "Elige una Opcion"+ '***'*3 + '\n')
+    
 
     product = ''
     while product not in products:
-        print('Elige un Producto, o escribe su nombre')
+        
         for p in range(0, len(products)):
             print(str(p+1) + ' - ' + str(products[p].capitalize().replace('_',' ')))
 
+        print('\n \n' + '***'*3 + "Elige una Opcion"+ '***'*3 + '\n')
+        print('Elige un Producto, o escribe su nombre')
         eleccion = input('Tipea el nombre de un producto (debe ser exactamente igual que en listado), o el numero que lo representa ==> ')
         if len(eleccion) in range(1,3):
             try:
@@ -117,7 +127,7 @@ def precio_internacional_productos(data):
             product = eleccion.lower().replace(' ','_')
 
 
-    system("cls")
+    clear()
 
     name_product = product.capitalize().replace('_',' ')
 
@@ -131,12 +141,16 @@ def precio_internacional_productos(data):
     fig, ax = plt.subplots()    
     ax.plot(labels, values) 
     plt.xticks(range(1980, 2017, 10))
-    plt.title('Evolucion del Precio de '+ name_product)
+    plt_name = 'Evolucion del Precio de '+ name_product
+    plt.title(plt_name)
+    plt.savefig(plt_name +'.jpg')
+    shutil.move(plt_name +'.jpg', './graphs/'+plt_name+'.jpg')
+
     plt.show()
     finalizar_programa()
 
 def finalizar_programa():
-    system("cls")
+    clear()
     print('\n \n')
     deseo = 0
     while deseo not in range(1,3):
@@ -152,11 +166,23 @@ def finalizar_programa():
     if deseo == 1:
         menu()
     elif deseo ==2:
-        system("cls")
+        clear()
         exit()
 
+
+
+
+def clear():
+    if os.name == "nt":
+        os.system("cls")
+    else:
+        os.system("clear")
+
+
+
+
 def menu():
-    system("cls")
+    clear()
     print('*******'*10)
     print('*******'*10 + '\n')
     
@@ -180,21 +206,21 @@ def menu():
     
     match(eleccion):
         case 1:
-            system("cls")
-            precio_dolar_historico(ocsv.read_csv('.datasets/dolarPrecio.csv',';'))
+            clear()
+            precio_dolar_historico(ocsv.read_csv('./datasets/dolarPrecio.csv',';'))
         case 2:
-            system("cls")
+            clear()
             inflacion_mundial(ocsv.read_csv('./datasets/inflacionMundial.csv',','))
         case 3:
-            system("cls")
+            clear()
             precio_internacional_productos(ocsv.read_csv('./datasets/indicePrecioProducto.csv',','))
             
         case 4:
-            system("cls")
+            clear()
             exit()
         
-    system("cls")
+    clear()
 
 if __name__=='__main__':
-    system("cls")
+    clear()
     menu()
