@@ -44,7 +44,7 @@ def precio_dolar_historico(data):
     plt_name = 'Valor de Dolar Oficial desde ' + str(year)
     plt.title(plt_name)
     plt.savefig(plt_name +'.jpg')
-    shutil.move(plt_name +'.jpg', './graphs/'+plt_name+'.jpg')
+    shutil.move(plt_name +'.jpg', './charts/'+plt_name+'.jpg')
     plt.show()
 
     finalizar_programa()
@@ -92,7 +92,7 @@ def inflacion_mundial(data):
     plt_name = 'Inflación Historica de '+ country
     plt.title(plt_name)
     plt.savefig(plt_name +'.jpg')
-    shutil.move(plt_name +'.jpg', './graphs/'+plt_name+'.jpg')
+    shutil.move(plt_name +'.jpg', './charts/'+plt_name+'.jpg')
     plt.show()
     clear()
     finalizar_programa()
@@ -144,7 +144,7 @@ def precio_internacional_productos(data):
     plt_name = 'Evolucion del Precio de '+ name_product
     plt.title(plt_name)
     plt.savefig(plt_name +'.jpg')
-    shutil.move(plt_name +'.jpg', './graphs/'+plt_name+'.jpg')
+    shutil.move(plt_name +'.jpg', './charts/'+plt_name+'.jpg')
 
     plt.show()
     finalizar_programa()
