@@ -312,4 +312,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+#archivos personales de soporte
+main2.py
+open_csv.py
 # End of https://www.toptal.com/developers/gitignore/api/windows,linux,macos,python,images

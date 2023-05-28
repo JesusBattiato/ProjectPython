@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
+import pandas as pd
+import math
 import numpy as np
 import open_csv as ocsv
 import os
-import shutil
 
-def precio_dolar_historico(data):
+
+def precio_dolar_historico():
     clear()
     year = 1913
     while year not in range(1914,2024):
@@ -17,24 +19,24 @@ def precio_dolar_historico(data):
             print('Debes elegir un año comprendido entre 1914 y 2020, vuelve a intentarlo')
 
 
-    data = list(filter(lambda x: int(x['Year']) > int(year), data)) #filtramos año de inicio si queremos
+    df = pd.read_csv('./datasets/dolarPrecio.csv', sep=';')
+    df = df[df['Year']>int(year)]
+    data = df.set_index('Year').T.to_dict()
 
-    labels=[]
-    for item in data: #itema es cada diccionario dentro del array de datos
-        label = [item['Year']for key in item] #genero una lista con el numero del año para cada key en cada diccioneario       
-        label.pop()#elimino un elemento ya que la primer columna dle archivo no corresponde, solo lleva los años, de esta manera me quedan 12 veces repetido el mismo año (una vez por mes) 
-        
-        for x in label:#label es un array con los años reemplazando a los meses, con esto busco eliminar el formato de lista de listas, y solo queda una lista con todos los valors
-            labels.append(int(x)) #transformo en int para evitar problemas al graficar
+    labels = []
+    for key in data.keys():
+        for i in data[key].keys():
+            labels.append(key)
 
-    values=[]
-    for item in data:
-        item.pop('Year')
+    values= []
+    for item in data.values():
         for x in item.values():
-            if x != '':
-                values.append(float(x))
-            else:
+            if math.isnan(x):
                 values.append(0)
+            else:
+                values.append(x)
+
+
     fig, ax = plt.subplots()
     
     ax.plot(labels, values)
@@ -49,14 +51,19 @@ def precio_dolar_historico(data):
     finalizar_programa()
 
 
-def inflacion_mundial(data):
+def inflacion_mundial():
     clear()
-    countries = [item['Country Name'] for item in data]
+    df = pd.read_csv('./datasets/inflacionMundial.csv', skiprows=4) #con skiprow  no leemos las primeras 4 filas (la tabla comienza en la 5ta)
+    df_dict = df.to_dict('records')
+
+
+    countries = [item['Country Name'] for item in df_dict]
+
     country = 9
     while country not in countries:
         
         for i in range(0, len(countries)-1):
-            print(str(i+1) + ' - ' + countries[i] )
+            print(str(i+1) + ' - ' + str(countries[i]) )
         
         print()
         print('Elige un Pais, o escribe su nombre')
@@ -70,7 +77,10 @@ def inflacion_mundial(data):
         elif len(eleccion) > 4:
             country = eleccion.capitalize()
 
-    data_country = list(filter(lambda item: item['Country Name'] == country, data))
+
+    df = df[df['Country Name'] == country]
+    df = df.drop(columns=['Unnamed: 67']) #pandas lee una ultima columna que realmente esta vacia
+    data_country = df.to_dict('records')
 
     labels = [key for key in data_country[0].keys()]
     del labels[0:4:1]
@@ -96,13 +106,11 @@ def inflacion_mundial(data):
     finalizar_programa()
 
 
-def precio_internacional_productos(data):
+def precio_internacional_productos():
     clear()
-    products = [key for key in data[0]]
+    df = pd.read_csv('./datasets/indicePrecioProducto.csv')
+    products = list(df.columns.values)
     products.pop(0)
-    products
-    
-    
 
     product = ''
     while product not in products:
@@ -124,18 +132,15 @@ def precio_internacional_productos(data):
         elif len(eleccion) > 2:
             product = eleccion.lower().replace(' ','_')
 
-
     clear()
 
     name_product = product.capitalize().replace('_',' ')
 
-    
-    #aca dividir en dos cosas label las fechas y values los valores del trigo
-    labels_fecha = [item['indice_tiempo'] for item in data]
+    labels_fecha = list(df['indice_tiempo'].values)
     labels = list(map(lambda x: int(x[0:4]),labels_fecha))
-    
-    values = [float(item[product]) if item[product]!='' else 0 for item in data ]
-  
+    values = list(df[product])
+
+
     fig, ax = plt.subplots()    
     ax.plot(labels, values) 
     plt.xticks(range(1980, 2017, 10))
@@ -149,6 +154,7 @@ def precio_internacional_productos(data):
 def finalizar_programa():
     clear()
     print('\n \n')
+    print('***'*2 + 'Se guardo la imagen en la carpeta charts' + '***'*2 + '\n')
     deseo = 0
     while deseo not in range(1,3):
         print('1 - Deseo volver al menu principal \n2 - Deseo Salir del programa')
@@ -204,13 +210,13 @@ def menu():
     match(eleccion):
         case 1:
             clear()
-            precio_dolar_historico(ocsv.read_csv('./datasets/dolarPrecio.csv',';'))
+            precio_dolar_historico()
         case 2:
             clear()
-            inflacion_mundial(ocsv.read_csv('./datasets/inflacionMundial.csv',','))
+            inflacion_mundial()
         case 3:
             clear()
-            precio_internacional_productos(ocsv.read_csv('./datasets/indicePrecioProducto.csv',','))
+            precio_internacional_productos()
             
         case 4:
             clear()
