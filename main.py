@@ -1,47 +1,54 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import seaborn as sns
 import math
 import os
 
 
 def precio_dolar_historico():
     clear()
-    year = 1913
-    while year not in range(1914,2024):
+    year_ini = 1913
+    while year_ini not in range(1914,2024):
         try:
-            year= int(input('Tipea un año desde 1914 en adelante ==> '))
+            year_ini= int(input('Desde: Tipea un año desde 1914 en adelante ==> '))
         except ValueError:
             print('Eso que fue?')
 
-        if year not in range(1914,2024):
+        if year_ini not in range(1914,2024):
+            print('Debes elegir un año comprendido entre 1914 y 2020, vuelve a intentarlo')
+
+    year_fin = year_ini - 1
+    while year_fin not in range(year_ini,2024):
+        try:
+            year_fin= int(input('Hasta: Tipea un año desde el año que elegiste en el punto anterior en adelante ==> '))
+        except ValueError:
+            print('Eso que fue?')
+
+        if year_fin not in range(year_ini,2024):
             print('Debes elegir un año comprendido entre 1914 y 2020, vuelve a intentarlo')
 
 
-    df = pd.read_csv('./datasets/dolarPrecio.csv', sep=';')
-    df = df[df['Year']>int(year)]
-    data = df.set_index('Year').T.to_dict()
+    df = pd.read_csv('./datasets/dolarPrecio.csv', sep=';') #leemos
+    df = df.copy()#por sia
+    df = df[(df['Year']>=int(year_ini)) & (df['Year']<=int(year_fin))]#filtramos
+    #data = df.set_index('Year').T.to_dict()
+    df_data= df.loc[:,'Ene':'Dic']#eliminamos columna year
 
-    labels = []
-    for key in data.keys():
-        for i in data[key].keys():
-            labels.append(key)
+    values = np.array(df_data, dtype='float16').reshape(-1) #haemos un array de una dimension de todos los datos
+    
+    for column in df_data.columns: #for para reemplazar todos los valoes de df_data por los valores del año
+     df_data[column] = df['Year']
 
-    values= []
-    for item in data.values():
-        for x in item.values():
-            if math.isnan(x):
-                values.append(0)
-            else:
-                values.append(x)
-
+    labels = np.array(df_data, dtype='int').reshape(-1)
 
     fig, ax = plt.subplots()
     
     ax.plot(labels, values)
    
     plt.ylim(-1,600) 
-    plt.xticks(range(year, 2023, 10))
-    plt_name = 'Valor de Dolar Oficial desde ' + str(year)
+    plt.xticks(range(year_ini, year_fin, 10))
+    plt_name = 'Valor de Dolar Oficial desde ' + str(year_ini) + ' hasta ' + str(year_fin)
     plt.title(plt_name)
     plt.savefig('./charts/'+plt_name +'.jpg')
     plt.show()
@@ -51,54 +58,58 @@ def precio_dolar_historico():
 
 def inflacion_mundial():
     clear()
-    df = pd.read_csv('./datasets/inflacionMundial.csv', skiprows=4) #con skiprow  no leemos las primeras 4 filas (la tabla comienza en la 5ta)
-    df_dict = df.to_dict('records')
+    df_inflacion = pd.read_csv('./datasets/inflacionMundial.csv', skiprows=4) #con skiprow  no leemos las primeras 4 filas (la tabla comienza en la 5ta)
+    df_inflacion = df_inflacion.drop(columns=['Unnamed: 67']) #pandas lee una ultima columna que realmente esta vacia
+    countries = np.array(df_inflacion['Country Name'])
 
 
-    countries = [item['Country Name'] for item in df_dict]
-
-    country = 9
-    while country not in countries:
-        
-        for i in range(0, len(countries)-1):
-            print(str(i+1) + ' - ' + str(countries[i]) )
-        
-        print()
-        print('Elige un Pais, o escribe su nombre')
-        eleccion = input('Tipea el nombre de un pais (debe ser exactamente igual que en listado), o el numero que lo representa ==> ')
-        if len(eleccion) in range(1,4):
-            if int(eleccion) in range(0, len(countries)):
-                country = countries[int(eleccion)-1]
-            else:
-                print('Elige nuevamente, creo que te equivocaste')
+    array_country = []
+    def elegir():
+        country = 0
+        while country not in countries:
             
-        elif len(eleccion) > 4:
-            country = eleccion.capitalize()
+            for i in range(0, len(countries)-1):
+                print(str(i+1) + ' - ' + str(countries[i]) )
+            
+            print()
+            print('Elige un Pais, o escribe su nombre')
+            eleccion = input('Tipea el nombre de un pais (debe ser exactamente igual que en listado), o el numero que lo representa ==> ')
+            if len(eleccion) in range(1,4):
+                if int(eleccion) in range(0, len(countries)):
+                    country = countries[int(eleccion)-1]
+                    array_country.append(country)
+                else:
+                    print('Elige nuevamente, creo que te equivocaste')
+                
+            elif len(eleccion) > 4:
+                if eleccion.capitalize() in countries:
+                    country = eleccion.capitalize()
+                    array_country.append(country)
+                else:
+                    print('Elige nuevamente, creo que te equivocaste')  
+            
+        return array_country
 
-
-    df = df[df['Country Name'] == country]
-    df = df.drop(columns=['Unnamed: 67']) #pandas lee una ultima columna que realmente esta vacia
-    data_country = df.to_dict('records')
-
-    labels = [key for key in data_country[0].keys()]
-    del labels[0:4:1]
-    del labels[len(labels)-1]
-    labels = [int(label)  if label!='' else 0 for label in labels]
-
-    values = [values for values in data_country[0].values()]
-    del values[0:4:1]
-    del values[len(values)-1]
+    paises = []
+    otro = ''
+    while otro != '2':
+        paises = elegir()
+        clear()
+        for pais in paises:
+            print(pais, end=', ')
+        otro = input('\nQuieres elegir otro pais \n1 - Si \n2 - No \nTipea ==> ')
     
-    values = [float(value)  if value!='' else 0 for value in values]
+    df_inflacion2 = df_inflacion[df_inflacion['Country Name'].isin(paises)]
+    df = df_inflacion2.iloc[:,4:].transpose()
+    df.index = pd.to_numeric(df.index)
 
-   
-    fig, ax = plt.subplots()    
-    ax.plot(labels, values) 
-    plt.ylim(-1,150)
-    plt.xticks(range(1960, 2023, 10))
-    plt_name = 'Inflación Historica de '+ country
-    plt.title(plt_name)
-    plt.savefig('./charts/'+plt_name +'.jpg')
+    df.columns = paises
+
+    sns.relplot(data = df, kind='line')
+    plt.ylim(-1,100)
+    paises_titulo = (', '.join(map(str, paises)))
+    plt.title('Inflación Historica: ' + paises_titulo)
+    plt.savefig('./charts/'+'Inflación Historica: ' + paises_titulo +'.jpg')
     plt.show()
     clear()
     finalizar_programa()
@@ -110,39 +121,55 @@ def precio_internacional_productos():
     products = list(df.columns.values)
     products.pop(0)
 
-    product = ''
-    while product not in products:
-        
-        for p in range(0, len(products)):
-            print(str(p+1) + ' - ' + str(products[p].capitalize().replace('_',' ')))
+    array_productos = []
 
-        print('\n \n' + '***'*3 + "Elige una Opcion"+ '***'*3 + '\n')
-        print('Elige un Producto, o escribe su nombre')
-        eleccion = input('Tipea el nombre de un producto (debe ser exactamente igual que en listado), o el numero que lo representa ==> ')
-        if len(eleccion) in range(1,3):
-            try:
-                if int(eleccion) in range(0, len(products)):
-                    product = products[int(eleccion)-1]
+    def elegir():
+        product = ''
+        while product not in products:
+            
+            for p in range(1, len(products)+1):
+                print(str(p) + ' - ' + str(products[p-1].capitalize().replace('_',' ')))
+
+            print('\n \n' + '***'*3 + "Elige una Opcion"+ '***'*3 + '\n')
+            print('Elige un Producto, o escribe su nombre')
+            eleccion = input('Tipea el nombre de un producto (debe ser exactamente igual que en listado), o el numero que lo representa ==> ')
+            if len(eleccion) in range(1,3):
+                try:
+                    if int(eleccion) in range(1, len(products)+1):
+                        product = products[int(eleccion)-1]
+                        array_productos.append(product)
+                    else:
+                        print('Elige nuevamente, creo que te equivocaste')
+                except ValueError:
+                    print('¿Y eso que fue?')
+            elif len(eleccion) > 2:
+                product = eleccion.lower().replace(' ','_')
+                if product in products:
+                 array_productos.append(product)
                 else:
-                    print('Elige nuevamente, creo que te equivocaste')
-            except ValueError:
-                print('¿Y eso que fue?')
-        elif len(eleccion) > 2:
-            product = eleccion.lower().replace(' ','_')
+                 print('Elige nuevamente, creo que te equivocaste')
+                
 
+        return array_productos
+
+    productos_elegidos = []
+    otro = ''
+    while otro != '2':
+        productos_elegidos = elegir()
+        for producto in productos_elegidos:
+            print(producto.capitalize().replace('_',' '), end=', ')
+        otro = input('\nQuieres elegir otro producto \n1 - Si \n2 - No \nTipea ==> ')
+
+    name_product = [producto.capitalize().replace('_',' ') for producto in productos_elegidos]
+    name_product_str = (', '.join(map(str, name_product)))
+    df2 = df[productos_elegidos]
+    df2['Tiempo'] = df['indice_tiempo'].map(lambda x: str(x)[0:4])
+    df2['Tiempo'] = df2['Tiempo'].astype('int')
+    df3 = df2.set_index('Tiempo')
     clear()
-
-    name_product = product.capitalize().replace('_',' ')
-
-    labels_fecha = list(df['indice_tiempo'].values)
-    labels = list(map(lambda x: int(x[0:4]),labels_fecha))
-    values = list(df[product])
-
-
-    fig, ax = plt.subplots()    
-    ax.plot(labels, values) 
-    plt.xticks(range(1980, 2017, 10))
-    plt_name = 'Evolucion del Precio de '+ name_product
+    print('****'*3 + '\nAguardo un momento por favor, se esta generando su grafica\n' + '****'*3)
+    sns.lineplot(data = df3)
+    plt_name = 'Evolucion del Precio de '+ name_product_str
     plt.title(plt_name)
     plt.savefig('./charts/'+plt_name +'.jpg')
 
@@ -190,7 +217,7 @@ def menu():
 
 
     print('1 - Valor historico del dolar en Argentina \n')
-    print('2 - Evolucion de la inflacion en algún pais en Especial \n')
+    print('2 - Evolucion de la inflacion en uno o varios países \n')
     print('3 - Precio internacional de algun producto en el tiempo \n \n')
     print('4 - Salir del programa \n \n')
     
